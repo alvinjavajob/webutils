@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JSON | 时间戳</title>
+    <meta charset="UTF-8">
+    <script src="./js/jquery-3.5.1.min.js"></script>
+    <script src="./js/convert.js"></script>
+    <script src="./js/md5.js"></script>
+    <link type="text/css" rel="stylesheet" href="./css/format.css">
+</head>
+
+<body>
+<!-- 左边 -->
+<div class="main-l">
+    <div class="title">JSON 解析工具</div>
+    <!-- 输入 -->
+    <div class="main-input">
+        <textarea id="input" class="input" onfocus="this.select()">{"名称":"\"JSON\"工具","功能":[{"直接作用":["着色","分层","去转义"]},{"间接作用":[{"愉悦心情":true},{"从此无敌":false}]},{"key的颜色":["value有多种颜色",1,2,null,true,false]}]}</textarea>
+    </div>
+    <div class="pullSize" id="pullSize"></div>
+    <!-- 控制 -->
+    <div class="control" id="control">
+        <label for="tropeCheckBox" class="checkbox">
+            <input type="checkbox" id="tropeCheckBox" onclick="tropeClicked(this)">保留转义
+        </label>
+        <label for="arrayNewLineBox" class="checkbox">
+            <input type="checkbox" id="arrayNewLineBox" onclick="newLineClicked(this)">Array换行
+        </label>
+        <input type="button" onclick="compress()" value="压缩"/>
+        <input type="button" onclick="copyText('output')" value="复制JSON"/>
+        <span id="levelElement"></span>
+    </div>
+    <!-- 输出 -->
+    <div resize="" id="output" class="output"></div>
+</div>
+<!-- 右边 -->
+<div class="main-r">
+    <div class="title" onclick="expandTable('#timeDiv')">时间戳转换</div>
+    <div id="timeDiv">
+        <table class="table time">
+            <tr>
+                <td colspan="3" style="text-align: center;">今天</td>
+            </tr>
+            <tr>
+                <td class="tableKey">起始时间戳</td>
+                <td class="tableVal"><input id="stampStart" type="text" onfocus="this.select()" readonly="true"
+                                            class="timeInput"/></td>
+                <td class="alignLeft"><input type="button" onclick="copyText('stampStart')" value="复制"></td>
+            </tr>
+            <tr>
+                <td class="tableKey">结束时间戳</td>
+                <td class="tableVal"><input id="stampEnd" type="text" onfocus="this.select()" readonly="true"
+                                            class="timeInput"/></td>
+                <td class="alignLeft"><input type="button" onclick="copyText('stampEnd')" value="复制"></td>
+            </tr>
+            <tr>
+                <td class="tableKey">起始时间</td>
+                <td class="tableVal"><input id="timeStart" type="text" onfocus="this.select()" readonly="true"
+                                            class="timeInput"/></td>
+                <td class="alignLeft"><input type="button" onclick="copyText('timeStart')" value="复制"></td>
+            </tr>
+            <tr>
+                <td class="tableKey">结束时间</td>
+                <td class="tableVal"><input id="timeEnd" type="text" onfocus="this.select()" readonly="true"
+                                            class="timeInput"/></td>
+                <td class="alignLeft"><input type="button" onclick="copyText('timeEnd')" value="复制"></td>
+            </tr>
+        </table>
+        <table class="table time">
+            <tr>
+                <td colspan="4" style="text-align: center;">
+                    <input class="selectType" type="radio" name="selectType" value="ms" checked="checked">毫秒</input>
+                    <input class="selectType" type="radio" name="selectType" value="s">秒</input>
+                </td>
+            </tr>
+            <tr>
+                <td class="tableKey2" align="center">时间戳</td>
+                <td/>
+                <td class="tableKey2" align="center">日期时间</td>
+            </tr>
+            <tr>
+                <td class="tableVal"><input id="timestamp1" type="text" class="timeInput" onfocus="this.select()"
+                                            style="width: 100px"/></td>
+                <td class="alignLeft"><input type="button" onclick="butClick(1)" ondblclick="butDblClickt(1)"
+                                             value=" = ">
+                </td>
+                <td class="tableVal"><input id="date1" type="text" class="timeInput" onfocus="this.select()"/></td>
+            </tr>
+            <tr>
+                <td class="tableVal"><input id="timestamp2" type="text" class="timeInput" onfocus="this.select()"
+                                            style="width: 100px"/></td>
+                <td class="alignLeft"><input type="button" onclick="butClick(2)" ondblclick="butDblClickt(2)"
+                                             value=" = ">
+                </td>
+                <td class="tableVal"><input id="date2" type="text" class="timeInput" onfocus="this.select()"/></td>
+            </tr>
+            <tr>
+                <td class="tableVal"><input id="timestamp3" type="text" class="timeInput" onfocus="this.select()"
+                                            style="width: 100px"/></td>
+                <td class="alignLeft"><input type="button" onclick="butClick(3)" ondblclick="butDblClickt(3)"
+                                             value=" = ">
+                </td>
+                <td class="tableVal"><input id="date3" type="text" class="timeInput" onfocus="this.select()"/></td>
+            </tr>
+            <tr>
+                <td class="tableVal"><input id="timestamp4" type="text" class="timeInput" onfocus="this.select()"
+                                            style="width: 100px"/></td>
+                <td class="alignLeft"><input type="button" onclick="butClick(4)" ondblclick="butDblClickt(4)"
+                                             value=" = ">
+                </td>
+                <td class="tableVal"><input id="date4" type="text" class="timeInput" onfocus="this.select()"/></td>
+            </tr>
+            <tr>
+                <td class="tableVal"><input id="timestamp5" type="text" class="timeInput" onfocus="this.select()"
+                                            style="width: 100px"/></td>
+                <td class="alignLeft"><input type="button" onclick="butClick(5)" ondblclick="butDblClickt(5)"
+                                             value=" = ">
+                </td>
+                <td class="tableVal"><input id="date5" type="text" class="timeInput" onfocus="this.select()"/></td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+
+    <div class="title" onclick="expandTable('#md5Div')">MD5摘要</div>
+    <div id="md5Div">
+        <table class="table md5">
+            <tr>
+                <td>
+                <textarea id="md5txt" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 40px"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input type="button" onclick="md5Click()" ondblclick="doubleClick('#md5txt', '#md5value')"
+                           style="margin: 0px 0px 4px 0px" value="MD5">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <textarea id="md5value" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 20px"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+
+    <div class="title" onclick="expandTable('#base64Div')">Base64编码/解码</div>
+    <div id="base64Div">
+        <table class="table base64">
+            <tr>
+                <td>
+                <textarea id="base64txt" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 100px"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input type="button" onclick="base64Click()" ondblclick="doubleClick('#base64txt', '#base64value')"
+                           style="margin: 0px 0px 4px 0px" value="Base64">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <textarea id="base64value" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 100px"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+
+    <div class="title" onclick="expandTable('#urlDiv')">URL编码/解码</div>
+    <div id="urlDiv">
+        <table class="table">
+            <tr>
+                <td>
+                <textarea id="urlTxt" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 120px"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input type="button" onclick="urlClick()" ondblclick="doubleClick('#urlTxt', '#urlValue')"
+                           style="margin: 0px 0px 4px 0px" value="Base64">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                <textarea id="urlValue" class="input2" onfocus="this.select()"
+                          style="width: 98%; height: 120px"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<br/>
+
+
+</body>
+
+</html>

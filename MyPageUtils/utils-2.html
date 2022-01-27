@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>socket|跨域|上传</title>
+    <script src="./js/jquery-3.5.1.min.js"></script>
+    <script src="./js/sockjs.min.js"></script>
+    <script src="./js/stomp.min.js"></script>
+    <script src="./js/utils-2.js"></script>
+
+    <style>
+        .title {
+            text-align: center;
+            background-color: #646464;
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .main-l {
+            float: left;
+            width: calc(100% - 338px);
+            height: calc(100% - 10px);
+            padding: 5px 10px;
+            border: 1px solid rgb(169, 169, 169);
+            background: #F8F8F8;
+        }
+
+        .main-ru {
+            float: left;
+            width: 280px;
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: 1px solid rgb(169, 169, 169);
+            background: #F8F8F8;
+        }
+
+        .main-rd {
+            float: left;
+            width: 280px;
+            padding: 5px 10px;
+            margin: 10px 0 0 10px;
+            border: 1px solid rgb(169, 169, 169);
+            background: #F8F8F8;
+        }
+
+        .main-ru .header {
+            width: 100%;
+        }
+
+        .main-ru .header .header-title,
+        .main-ru .header .header-content,
+        .main-ru .header .header-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-ru .header .header-content {
+            margin: 6px 0;
+        }
+
+        .main-ru .header .header-footer {
+            justify-content: space-around;
+        }
+
+        .main-ru .header .header-content input {
+            width: 50%;
+            margin: 0 2px;
+            flex: 1;
+        }
+
+        #wsUrl {
+            width: calc(100% - 105px);
+        }
+        #stUrl1 {
+            width: calc(40% - 80px);
+        }
+        .topicWidth {
+            width: calc(30% - 80px);
+            padding: 5px 10px;
+        }
+        .tdWidth {
+            width: calc(100%);
+        }
+
+    </style>
+</head>
+
+<body>
+<!-- 左边 -->
+<div class="main-l">
+    <div class="title">WebSocket测试</div>
+    <div>
+        <table>
+            <tr>
+                <td rowspan="2">
+                    STOMP:
+                </td>
+                <td class="tdWidth">
+                    <input type="text" id="header" placeholder='头信息, 如 {"token":"xxx", "langue":"zh_CN"}'
+                           onblur="storageData('header','')" style="width: 100%">
+                </td>
+            </tr>
+            <tr>
+                <td class="tdWidth">
+                    <input type="text" id="stUrl1" placeholder="地址, 如 http://127.0.0.1:8888/chat"
+                           onblur="storageData('stUrl1','http://127.0.0.1:8888/chat')">
+                    <input id="stateDiv2" type="button" value=" 连接 " onclick="stompWebSocket()"
+                           style="background: #a94442">
+                    <input list="option" name="topic" id="topic" placeholder="订阅频道, 如 /topic/public" >
+                    <datalist id="option">
+                    </datalist>
+                    <input id="stateDiv3" type="button" value=" 订阅 " onclick="mySubscribe()"
+                           style="background: #a98c42ff">
+
+                    <span id="unTopicSpan" style="display:none">
+                        <select id="selectTopic" class="topicWidth" />
+                        <input id="unSubscribe" type="button" value=" 取消订阅 " onclick="unSubscribeButton()"
+                               style="background: #a98c42ff">
+                    </span>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        原生:
+        <input type="text" id="wsUrl" placeholder="地址, 如 ws://127.0.0.1:8888/chat"
+               onblur="storageData('wsUrl','ws://127.0.0.1:8888/chat')">
+        <input id="stateDiv" type="button" value=" 连接 " onclick="nativeWebSocket()" style="background: #a94442">
+    </div>
+
+    <div>
+        <h4>服务器返回消息：</h4>
+        <textarea id="responseText" style="width: 100%;height: 300px"></textarea>
+        <input type="button" onclick="javascript:document.getElementById('responseText').value=''" value="清除">
+    </div>
+    <div>
+        <h4>客户端输入：</h4>
+        <div>
+            <input type="text" id="sendChannel" placeholder="发送频道, 如 /topic/public" onblur="storageData('sendChannel','/app')">
+        </div>
+        <div>
+            <textarea id="message" placeholder="[Ctrl] + [Enter] 发送消息"
+                      onkeydown="if(event.ctrlKey===true && event.keyCode===13){sendMessage()}"
+                      style="width: 100%;height: 100px" onblur="storageData('message','hello')"></textarea>
+        </div>
+        <div>
+            <input type="button" value="发送消息" onclick="sendMessage()"/>
+            <input type="button" onclick="$('#message').val('')" value="清除">
+        </div>
+    </div>
+</div>
+
+
+<!-- 右边上 -->
+<div class="main-ru">
+    <div class="title">跨域测试</div>
+    测试地址:
+    <div>上传地址:</div>
+    <input type="text" id="url" placeholder="请输入测试跨域地址..." onblur="storageData('url','http://www.baidu.com')"
+           style="width: 98%;margin: 2px">
+    <div class="header">
+        <div class="header-title">
+            <span>请求头名称:</span>
+            <span>请求头值:</span>
+        </div>
+        <div class="header-content">
+            <input type="text" id="headerKey1" value="locale">
+            <input type="text" id="headerVal1" value="zh">
+        </div>
+        <div class="header-content">
+            <input type="text" id="headerKey2">
+            <input type="text" id="headerVal2">
+        </div>
+        <div class="header-content">
+            <input type="text" id="headerKey3">
+            <input type="text" id="headerVal3">
+        </div>
+        <div class="header-content">
+            <input type="text" id="headerKey4">
+            <input type="text" id="headerVal4">
+        </div>
+        <div class="header-content">
+            <input type="text" id="headerKey5">
+            <input type="text" id="headerVal5">
+        </div>
+        <div class="header-footer">
+            <input type="button" value="GET" onclick="sendAjax('GET')">
+            <input type="button" value="POST" onclick="sendAjax('POST')">
+        </div>
+    </div>
+
+    <hr>
+    <div>结果:</div>
+    <div id="ajaxResult"></div>
+</div>
+
+
+<!-- 右边下 -->
+<div class="main-rd">
+    <div class="title">上传文件测试</div>
+    <div>上传地址:</div>
+    <input type="text" id="fileUrl" placeholder="请输入服务地址..."
+           onblur="storageData('fileUrl','http://127.0.0.1:8080/upload')"
+           style="width: 98%;margin: 2px">
+
+    <form id="fileForm" action="xxx" method="post" enctype="multipart/form-data" onsubmit="thisOnsubmit();">
+        <input type="file" style="margin: 2px"/>
+        <div class="header-title">
+            <span>参数:</span>
+            <span>值:</span>
+        </div>
+        <div class="header-content">
+            <input type="text" id="uploadField1" placeholder="字段名" onblur="storageData('uploadField1','')"
+                   style="width: 35%">
+            <input type="text" id="uploadValue1" placeholder="字段值" onblur="storageData('uploadValue1','')"
+                   style="width: 55%">
+        </div>
+        <div class="header-content">
+            <input type="text" id="uploadField2" placeholder="字段名" onblur="storageData('uploadField2','')"
+                   style="width: 35%">
+            <input type="text" id="uploadValue2" placeholder="字段值" onblur="storageData('uploadValue2','')"
+                   style="width: 55%">
+        </div>
+        <input type="submit" value="上传" style="margin: 2px"/>
+    </form>
+</div>
+
+
+</body>
+
+<script type="text/javascript"></script>
+<!-- 脚本 -->
+
+</html>
